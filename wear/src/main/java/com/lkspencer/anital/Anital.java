@@ -92,7 +92,7 @@ public class Anital extends Activity implements SensorEventListener {
         light.setRotation(gravity * 10);
       } else {
         count++;
-        if (count == 50) {
+        if (count == 25) {
           count = 0;
         }
       }
