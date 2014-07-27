@@ -18,6 +18,9 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -47,8 +50,8 @@ public class Anital extends Activity implements SensorEventListener {
   };
   private SensorManager mSensorManager;
   private ImageView light;
-  private float gravity;
   private int count = 0;
+  private float currentPosition = 0.0f;
 
 
 
@@ -67,7 +70,7 @@ public class Anital extends Activity implements SensorEventListener {
     mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
     Sensor accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     if (accelerometer != null){
-      mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+      mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
     }
   }
 
@@ -85,17 +88,11 @@ public class Anital extends Activity implements SensorEventListener {
     // Do something here if sensor accuracy changes.
   }
 
+  private float[] values = new float[2];
+
   @Override public final void onSensorChanged(SensorEvent event) {
     if (light != null) {
-      if (count == 0) {
-        gravity = event.values[1];
-        light.setRotation(gravity * 10);
-      } else {
-        count++;
-        if (count == 25) {
-          count = 0;
-        }
-      }
+      light.setRotation((event.values[1] * 10));
     }
   }
 
