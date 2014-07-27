@@ -23,9 +23,9 @@ import java.util.TimeZone;
 
 public class Anital extends Activity implements SensorEventListener {
   private Calendar mTime;
-  private static final String ACTION_KEEP_WATCHFACE_AWAKE = "intent.action.keep.watchface.awake";
-  private static final String ACTION_KEEP_WATCHFACE_ASLEEP = "intent.action.keep.watchface.asleep";
-  private static final String ACTION_KEEP_WATCHFACE_SLEEP = "intent.action.keep.watchface.sleep";
+  private static final String ACTION_KEEP_WATCH_FACE_AWAKE = "intent.action.keep.watchface.awake";
+  private static final String ACTION_KEEP_WATCH_FACE_ASLEEP = "intent.action.keep.watchface.asleep";
+  private static final String ACTION_KEEP_WATCH_FACE_SLEEP = "intent.action.keep.watchface.sleep";
   private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
     @Override public void onReceive(Context context, Intent intent) {
       if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
@@ -33,7 +33,7 @@ public class Anital extends Activity implements SensorEventListener {
         createTime(timeZone);
       }
 
-      if (!ACTION_KEEP_WATCHFACE_AWAKE.equals(intent.getAction())) {
+      if (!ACTION_KEEP_WATCH_FACE_AWAKE.equals(intent.getAction())) {
         updateDate();
       }
     }
@@ -47,6 +47,9 @@ public class Anital extends Activity implements SensorEventListener {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_anital);
     updateDate();
+    //Setting values to prevent lint tool from throwing a fit;
+    m_total = 0;
+    m_i = 0;
   }
 
   @Override protected void onResume() {
@@ -72,13 +75,27 @@ public class Anital extends Activity implements SensorEventListener {
     super.onPause();
   }
 
-  @Override public final void onAccuracyChanged(Sensor sensor, int accuracy) {
-    // Do something here if sensor accuracy changes.
-  }
+  @Override public final void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
+  /*
+  NOTE: These have been pulled out to prevent memory allocation each time. The
+        frequency at which this event handler is called is the primary reason
+        for pulling anything out that I can to improve performance.
+   */
+  private float m_total = 0.0f;
+  private int m_i = 0;
+  private int m_length = 3;
+  private float[] values = new float[m_length];
   @Override public final void onSensorChanged(SensorEvent event) {
+    System.arraycopy(values, 0, values, 1, m_length - 1);
+    values[0] = event.values[1];
+
     if (light != null) {
-      light.setRotation((event.values[1] * 10));
+      m_total = 0.0f;
+      for (m_i = 0; m_i < m_length; m_i++) {
+        m_total += values[m_i];
+      }
+      light.setRotation((m_total * 3.0f) + values[0]);
     }
   }
 
@@ -99,9 +116,9 @@ public class Anital extends Activity implements SensorEventListener {
     filter.addAction(Intent.ACTION_TIME_TICK);
     filter.addAction(Intent.ACTION_TIME_CHANGED);
     filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-    filter.addAction(ACTION_KEEP_WATCHFACE_AWAKE);
-    filter.addAction(ACTION_KEEP_WATCHFACE_ASLEEP);
-    filter.addAction(ACTION_KEEP_WATCHFACE_SLEEP);
+    filter.addAction(ACTION_KEEP_WATCH_FACE_AWAKE);
+    filter.addAction(ACTION_KEEP_WATCH_FACE_ASLEEP);
+    filter.addAction(ACTION_KEEP_WATCH_FACE_SLEEP);
 
     registerReceiver(mIntentReceiver, filter);
   }
