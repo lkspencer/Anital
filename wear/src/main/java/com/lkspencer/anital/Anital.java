@@ -2,43 +2,33 @@ package com.lkspencer.anital;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Image;
 import android.os.BatteryManager;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 public class Anital extends Activity implements SensorEventListener {
-  private String mTimeZone;
   private Calendar mTime;
   private static final String ACTION_KEEP_WATCHFACE_AWAKE = "intent.action.keep.watchface.awake";
   private static final String ACTION_KEEP_WATCHFACE_ASLEEP = "intent.action.keep.watchface.asleep";
   private static final String ACTION_KEEP_WATCHFACE_SLEEP = "intent.action.keep.watchface.sleep";
   private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
     @Override public void onReceive(Context context, Intent intent) {
-      if (mTimeZone == null && Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
+      if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
         final String timeZone = intent.getStringExtra("time-zone");
         createTime(timeZone);
       }
