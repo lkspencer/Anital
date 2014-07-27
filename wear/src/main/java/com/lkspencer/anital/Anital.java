@@ -50,8 +50,6 @@ public class Anital extends Activity implements SensorEventListener {
   };
   private SensorManager mSensorManager;
   private ImageView light;
-  private int count = 0;
-  private float currentPosition = 0.0f;
 
 
 
@@ -87,8 +85,6 @@ public class Anital extends Activity implements SensorEventListener {
   @Override public final void onAccuracyChanged(Sensor sensor, int accuracy) {
     // Do something here if sensor accuracy changes.
   }
-
-  private float[] values = new float[2];
 
   @Override public final void onSensorChanged(SensorEvent event) {
     if (light != null) {
