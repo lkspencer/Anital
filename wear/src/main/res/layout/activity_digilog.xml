@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wearable.view.WatchViewStub
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/watch_view_stub"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".Anital">
+  <AnalogClock
+          android:dial="@drawable/digilog_dial"
+          android:hand_hour="@drawable/digilog_hour_hand"
+          android:hand_minute="@drawable/digilog_minute_hand"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"/>
+</android.support.wearable.view.WatchViewStub>
