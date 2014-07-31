@@ -12,4 +12,13 @@
           android:hand_minute="@drawable/digilog_minute_hand"
           android:layout_width="match_parent"
           android:layout_height="match_parent"/>
+  <DigitalClock
+          android:id="@+id/digital"
+          android:layout_gravity="center"
+          android:textColor="#ff6f00"
+          android:textSize="18sp"
+          android:background="#aa000000"
+          android:padding="5dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"/>
 </android.support.wearable.view.WatchViewStub>

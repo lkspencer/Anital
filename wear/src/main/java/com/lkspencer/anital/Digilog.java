@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.DigitalClock;
 import android.widget.ImageView;
 
 public class Digilog extends Activity {
@@ -22,13 +23,14 @@ public class Digilog extends Activity {
       */
     }
   };
+  private DigitalClock digital;
 
 
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_digilog);
-    //Setting values to prevent lint tool from throwing a fit;
+    digital = (DigitalClock)findViewById(R.id.digital);
   }
 
   @Override protected void onResume() {
@@ -63,9 +65,11 @@ public class Digilog extends Activity {
   }
 
   private void hideBackground() {
+    digital.setVisibility(View.GONE);
   }
 
   private void showBackground() {
+    digital.setVisibility(View.VISIBLE);
   }
 
 }
