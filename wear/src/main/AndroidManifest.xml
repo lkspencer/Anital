@@ -25,7 +25,7 @@
               android:label="Digilog"
               android:taskAffinity=""
               android:allowEmbedded="true" >
-      <meta-data android:name="com.google.android.clockwork.home.preview" android:resource="@drawable/default_face" />
+      <meta-data android:name="com.google.android.clockwork.home.preview" android:resource="@drawable/default_face2" />
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="com.google.android.clockwork.home.category.HOME_BACKGROUND" />
