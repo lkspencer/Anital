@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.DigitalClock;
-import android.widget.ImageView;
 
 public class Digilog extends Activity {
   private static final String ACTION_KEEP_WATCH_FACE_AWAKE = "intent.action.keep.watchface.awake";
@@ -18,7 +17,6 @@ public class Digilog extends Activity {
     @Override public void onReceive(Context context, Intent intent) {
       /*
       if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
-        final String timeZone = intent.getStringExtra("time-zone");
       }
       */
     }
