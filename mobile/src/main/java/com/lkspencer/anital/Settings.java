@@ -7,24 +7,30 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Settings extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-  /**
-   * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-   */
+  private static final String TAG = "com.lkspencer.anital";
   private NavigationDrawerFragment mNavigationDrawerFragment;
-
-  /**
-   * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-   */
   private CharSequence mTitle;
+  private GoogleApiClient mGoogleApiClient = null;
 
 
 
@@ -37,6 +43,34 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
 
     // Set up the drawer.
     mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+
+    mGoogleApiClient = new GoogleApiClient.Builder(this)
+            .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+              @Override public void onConnected(Bundle connectionHint) {
+                Log.d(TAG, "onConnected: " + connectionHint);
+                // Now you can use the data layer API
+              }
+
+              @Override public void onConnectionSuspended(int cause) {
+                Log.d(TAG, "onConnectionSuspended: " + cause);
+              }
+            })
+            .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+              {}
+              @Override public void onConnectionFailed(ConnectionResult result) {
+                Log.d(TAG, "onConnectionFailed: " + result);
+              }
+            })
+            .addApi(Wearable.API)
+            .build();
+
+    List<Node> nodes = getNodes();
+    for (Node node : nodes) {
+      MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "this is a test", null).await();
+      if (!result.getStatus().isSuccess()) {
+        Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
+      }
+    }
   }
 
   @Override public void onNavigationDrawerItemSelected(int position) {
@@ -60,14 +94,8 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
   }
 
   @Override public boolean onOptionsItemSelected(MenuItem item) {
-    // Handle action bar item clicks here. The action bar will
-    // automatically handle clicks on the Home/Up button, so long
-    // as you specify a parent activity in AndroidManifest.xml.
     int id = item.getItemId();
-    if (id == R.id.action_settings) {
-      return true;
-    }
-    return super.onOptionsItemSelected(item);
+    return id == R.id.action_settings || super.onOptionsItemSelected(item);
   }
 
 
@@ -87,24 +115,25 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
     actionBar.setTitle(mTitle);
   }
 
+  private List<Node> getNodes() {
+    List<Node> nodes = new ArrayList<Node>();
+    NodeApi.GetConnectedNodesResult rawNodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+    for (Node node : rawNodes.getNodes()) {
+      nodes.add(node);
+    }
+    return nodes;
+  }
 
 
-  /**
-   * A placeholder fragment containing a simple view.
-   */
+
   public static class PlaceholderFragment extends Fragment {
 
-    /**
-     * The fragment argument representing the section number for this
-     * fragment.
-     */
     private static final String ARG_SECTION_NUMBER = "section_number";
 
 
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-      View rootView = inflater.inflate(R.layout.fragment_settings, container, false);
-      return rootView;
+      return inflater.inflate(R.layout.fragment_settings, container, false);
     }
 
     @Override public void onAttach(Activity activity) {
@@ -114,10 +143,6 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
 
 
 
-    /**
-     * Returns a new instance of this fragment for the given section
-     * number.
-     */
     public static PlaceholderFragment newInstance(int sectionNumber) {
       PlaceholderFragment fragment = new PlaceholderFragment();
       Bundle args = new Bundle();
