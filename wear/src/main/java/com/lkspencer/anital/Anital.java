@@ -15,6 +15,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.widget.DigitalClock;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
 
 public class Anital extends Activity implements SensorEventListener {
 
@@ -60,14 +62,23 @@ public class Anital extends Activity implements SensorEventListener {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_anital);
     updateDate();
-    LoadSettings();
   }
 
   @Override protected void onResume() {
     super.onResume();
-    showBackground();
+    LoadSettings();
     registerReceiver();
-    showPercentage();
+    showBackground();
+    if (settings.ShowBatteryPercentage) {
+      showPercentage();
+    } else {
+      hidePercentage();
+    }
+    if (settings.ShowDigitalTime) {
+      showDigitalClock();
+    } else {
+      hideDigitalClock();
+    }
     light = (ImageView)findViewById(R.id.light);
     mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
     Sensor accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -99,7 +110,7 @@ public class Anital extends Activity implements SensorEventListener {
   //Methods
   private void LoadSettings() {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-    settings.SensorSpeed = preferences.getInt("Anital_SensorSpeed", SensorManager.SENSOR_DELAY_GAME);
+    settings.SensorSpeed = preferences.getInt("Anital_SensorSpeed", SensorManager.SENSOR_DELAY_UI);
     settings.ShowDigitalTime = preferences.getBoolean("Anital_ShowDigitalTime", true);
     settings.ShowBatteryPercentage = preferences.getBoolean("Anital_ShowBatteryPercentage", true);
     settings.ShowDayOfWeek = preferences.getBoolean("Anital_ShowDayOfWeek", false);
@@ -158,6 +169,16 @@ public class Anital extends Activity implements SensorEventListener {
     updateWatchBatteryPercentage();
     TextView watchBattery = (TextView)findViewById(R.id.watchBattery);
     watchBattery.setVisibility(View.VISIBLE);
+  }
+
+  private void hideDigitalClock() {
+    DigitalClock digital_clock = (DigitalClock)findViewById(R.id.digital_clock);
+    digital_clock.setVisibility(View.INVISIBLE);
+  }
+
+  private void showDigitalClock() {
+    DigitalClock digital_clock = (DigitalClock)findViewById(R.id.digital_clock);
+    digital_clock.setVisibility(View.VISIBLE);
   }
 
   private void updateWatchBatteryPercentage() {

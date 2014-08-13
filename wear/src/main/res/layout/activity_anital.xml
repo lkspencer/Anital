@@ -24,6 +24,7 @@
           android:layout_width="match_parent"
           android:layout_height="match_parent"/>
   <DigitalClock
+          android:id="@+id/digital_clock"
           android:textColor="#fff"
           android:background="#44000000"
           android:gravity="center"

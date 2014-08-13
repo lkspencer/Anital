@@ -1,0 +1,12 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="animate_frequency"
+        android:title="@string/pref_title_animate_frequency"
+        android:entries="@array/pref_animate_frequency_titles"
+        android:entryValues="@array/pref_animate_frequency_values"
+        android:defaultValue="1"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+</PreferenceScreen>

@@ -1,9 +1,10 @@
 package com.lkspencer.anital;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -21,8 +22,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.ByteBuffer;
 
 
 public class Settings extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -30,7 +30,6 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
   private static final String TAG = "com.lkspencer.anital";
   private NavigationDrawerFragment mNavigationDrawerFragment;
   private CharSequence mTitle;
-  private GoogleApiClient mGoogleApiClient = null;
 
 
 
@@ -43,42 +42,18 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
 
     // Set up the drawer.
     mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
-
-    mGoogleApiClient = new GoogleApiClient.Builder(this)
-            .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-              @Override public void onConnected(Bundle connectionHint) {
-                Log.d(TAG, "onConnected: " + connectionHint);
-                // Now you can use the data layer API
-              }
-
-              @Override public void onConnectionSuspended(int cause) {
-                Log.d(TAG, "onConnectionSuspended: " + cause);
-              }
-            })
-            .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-              {}
-              @Override public void onConnectionFailed(ConnectionResult result) {
-                Log.d(TAG, "onConnectionFailed: " + result);
-              }
-            })
-            .addApi(Wearable.API)
-            .build();
-
-    List<Node> nodes = getNodes();
-    for (Node node : nodes) {
-      MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "this is a test", null).await();
-      if (!result.getStatus().isSuccess()) {
-        Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
-      }
-    }
   }
 
   @Override public void onNavigationDrawerItemSelected(int position) {
+    Intent i = new Intent(this, SettingsActivity.class);
+    startActivity(i);
     // update the main content by replacing fragments
+    /*
     FragmentManager fragmentManager = getSupportFragmentManager();
     fragmentManager.beginTransaction()
             .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
             .commit();
+    */
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -115,20 +90,13 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
     actionBar.setTitle(mTitle);
   }
 
-  private List<Node> getNodes() {
-    List<Node> nodes = new ArrayList<Node>();
-    NodeApi.GetConnectedNodesResult rawNodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
-    for (Node node : rawNodes.getNodes()) {
-      nodes.add(node);
-    }
-    return nodes;
-  }
 
 
-
-  public static class PlaceholderFragment extends Fragment {
+  public static class PlaceholderFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final String PATH_NOTIFICATION_MESSAGE = "com.lkspencer.anital";
+    private GoogleApiClient mGoogleApiClient = null;
 
 
 
@@ -138,7 +106,45 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
 
     @Override public void onAttach(Activity activity) {
       super.onAttach(activity);
+      mGoogleApiClient = new GoogleApiClient.Builder(activity)
+              .addApi(Wearable.API)
+              .addConnectionCallbacks(this)
+              .addOnConnectionFailedListener(this)
+              .build();
+      mGoogleApiClient.connect();
       ((Settings) activity).onSectionAttached(getArguments().getInt(ARG_SECTION_NUMBER));
+    }
+
+    @Override public void onDetach() {
+      super.onDetach();
+      mGoogleApiClient.disconnect();
+    }
+
+    @Override public void onConnected(Bundle bundle) {
+      Log.d(TAG, "onConnected");
+      new Thread(new Runnable() {
+        {}
+        @Override public void run() {
+          NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+          for(Node node : nodes.getNodes()) {
+            byte[] data = ByteBuffer.allocate(4).putInt(SensorManager.SENSOR_DELAY_NORMAL).array();
+            MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "Anital_SensorSpeed", data).await();
+            if(!result.getStatus().isSuccess()){
+              Log.e(TAG, "error");
+            } else {
+              Log.i(TAG, "success!! sent to: " + node.getDisplayName());
+            }
+          }
+        }
+      }).start();
+    }
+
+    @Override public void onConnectionSuspended(int i) {
+      Log.d(TAG, "onConnectionSuspended");
+    }
+
+    @Override public void onConnectionFailed(ConnectionResult connectionResult) {
+      Log.e(TAG, "Failed to connect to Google API Client");
     }
 
 
