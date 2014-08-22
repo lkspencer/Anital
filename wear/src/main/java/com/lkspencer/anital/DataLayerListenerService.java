@@ -26,6 +26,30 @@ public class DataLayerListenerService extends WearableListenerService {
 
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
       preferences.edit().putInt("Anital_SensorSpeed", Anital_SensorSpeed).apply();
+    } else if ("show_digital".equalsIgnoreCase(path)) {
+      ByteBuffer wrapped = ByteBuffer.wrap(messageEvent.getData());
+      boolean show_digital = wrapped.getInt() != 0;
+
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+      preferences.edit().putBoolean("Anital_ShowDigitalTime", show_digital).apply();
+    } else if ("show_day_of_week".equalsIgnoreCase(path)) {
+      ByteBuffer wrapped = ByteBuffer.wrap(messageEvent.getData());
+      boolean show_day_of_week = wrapped.getInt() != 0;
+
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+      preferences.edit().putBoolean("Anital_ShowDayOfWeek", show_day_of_week).apply();
+    } else if ("show_date".equalsIgnoreCase(path)) {
+      ByteBuffer wrapped = ByteBuffer.wrap(messageEvent.getData());
+      boolean show_date = wrapped.getInt() != 0;
+
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+      preferences.edit().putBoolean("Anital_ShowDate", show_date).apply();
+    } else if ("show_battery".equalsIgnoreCase(path)) {
+      ByteBuffer wrapped = ByteBuffer.wrap(messageEvent.getData());
+      boolean show_battery = wrapped.getInt() != 0;
+
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+      preferences.edit().putBoolean("Anital_ShowBatteryPercentage", show_battery).apply();
     }
     super.onMessageReceived(messageEvent);
   }

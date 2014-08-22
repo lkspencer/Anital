@@ -36,6 +36,18 @@
     <item>1</item>
   </string-array>
 
+  <string name="pref_title_show_digital">Show Digital Clock</string>
+  <string name="pref_description_show_digital">Show or hide the digital clock at the top of Anital\'s watch face.</string>
+
+  <string name="pref_title_show_day_of_week">Show Day of Week</string>
+  <string name="pref_description_show_day_of_week">Show or hide the day of the week at the top of Anital\'s watch face (Checking this will force the digital clock to be hidden).</string>
+
+  <string name="pref_title_show_date">Show Date</string>
+  <string name="pref_description_show_date">Show or hide the date at the bottom of Anital\'s watch face.</string>
+
+  <string name="pref_title_show_battery">Show Battery Percentage</string>
+  <string name="pref_description_show_battery">Show or hide the battery percentage in the top right corner of Anital\'s watch face.</string>
+
   <!-- Example settings for Data & Sync -->
   <string name="pref_header_data_sync">Data &amp; sync</string>
 

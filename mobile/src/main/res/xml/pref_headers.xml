@@ -8,10 +8,6 @@
 
     <header
         android:fragment="com.lkspencer.anital.SettingsActivity$NotificationPreferenceFragment"
-        android:title="@string/pref_header_notifications" />
-
-    <header
-        android:fragment="com.lkspencer.anital.SettingsActivity$DataSyncPreferenceFragment"
-        android:title="@string/pref_header_data_sync" />
+        android:title="@string/pref_header_anital" />
 
 </preference-headers>

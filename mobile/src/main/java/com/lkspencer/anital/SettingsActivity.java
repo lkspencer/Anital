@@ -106,18 +106,7 @@ public class SettingsActivity extends PreferenceActivity implements GoogleApiCli
         @Override public void run() {
           NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
           for (Node node : nodes.getNodes()) {
-            byte[] data;
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
-            String Anital_SensorSpeed = preferences.getString("animate_frequency", String.valueOf(SensorManager.SENSOR_DELAY_UI));
-            data = ByteBuffer.allocate(4)
-                    .putInt(Integer.parseInt(Anital_SensorSpeed))
-                    .array();
-            MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "Anital_SensorSpeed", data).await();
-            if (!result.getStatus().isSuccess()) {
-              Log.e(TAG, "error");
-            } else {
-              Log.i(TAG, "success!! sent to: " + node.getDisplayName());
-            }
+            SendSettingsToWear(node);
           }
         }
       }).start();
@@ -280,6 +269,52 @@ public class SettingsActivity extends PreferenceActivity implements GoogleApiCli
                     .getString(preference.getKey(), ""));
   }
 
+  private void SendSettingsToWear(Node node) {
+    byte[] data;
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);
+    String Anital_SensorSpeed = preferences.getString("animate_frequency", String.valueOf(SensorManager.SENSOR_DELAY_UI));
+    data = ByteBuffer.allocate(4)
+            .putInt(Integer.parseInt(Anital_SensorSpeed))
+            .array();
+    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "Anital_SensorSpeed", data).await();
+    LogSendMessageResult(node, result);
+
+    boolean show_digital = preferences.getBoolean("show_digital", true);
+    data = ByteBuffer.allocate(4)
+            .putInt(show_digital ? 1 : 0)
+            .array();
+    result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "show_digital", data).await();
+    LogSendMessageResult(node, result);
+
+    boolean show_day_of_week = preferences.getBoolean("show_day_of_week", true);
+    data = ByteBuffer.allocate(4)
+            .putInt(show_day_of_week ? 1 : 0)
+            .array();
+    result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "show_day_of_week", data).await();
+    LogSendMessageResult(node, result);
+
+    boolean show_date = preferences.getBoolean("show_date", true);
+    data = ByteBuffer.allocate(4)
+            .putInt(show_date ? 1 : 0)
+            .array();
+    result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "show_date", data).await();
+    LogSendMessageResult(node, result);
+
+    boolean show_battery = preferences.getBoolean("show_battery", true);
+    data = ByteBuffer.allocate(4)
+            .putInt(show_battery ? 1 : 0)
+            .array();
+    result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "show_battery", data).await();
+    LogSendMessageResult(node, result);
+  }
+
+  private void LogSendMessageResult(Node node, MessageApi.SendMessageResult result) {
+    if (!result.getStatus().isSuccess()) {
+      Log.e(TAG, "error");
+    } else {
+      Log.i(TAG, "success!! sent to: " + node.getDisplayName());
+    }
+  }
 
 
   /**

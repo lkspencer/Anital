@@ -9,4 +9,28 @@
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
 
+  <CheckBoxPreference
+          android:key="show_digital"
+          android:title="@string/pref_title_show_digital"
+          android:summary="@string/pref_description_show_digital"
+          android:defaultValue="true" />
+
+  <CheckBoxPreference
+          android:key="show_day_of_week"
+          android:title="@string/pref_title_show_day_of_week"
+          android:summary="@string/pref_description_show_day_of_week"
+          android:defaultValue="true" />
+
+  <CheckBoxPreference
+          android:key="show_date"
+          android:title="@string/pref_title_show_date"
+          android:summary="@string/pref_description_show_date"
+          android:defaultValue="true" />
+
+  <CheckBoxPreference
+          android:key="show_battery"
+          android:title="@string/pref_title_show_battery"
+          android:summary="@string/pref_description_show_battery"
+          android:defaultValue="true" />
+
 </PreferenceScreen>

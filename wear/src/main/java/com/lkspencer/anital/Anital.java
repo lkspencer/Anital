@@ -50,6 +50,7 @@ public class Anital extends Activity implements SensorEventListener {
   private class AnitalSettings {
     public int SensorSpeed;
     public boolean ShowDigitalTime;
+    public boolean ShowDate;
     public boolean ShowBatteryPercentage;
     public boolean ShowDayOfWeek;
   }
@@ -78,6 +79,21 @@ public class Anital extends Activity implements SensorEventListener {
       showDigitalClock();
     } else {
       hideDigitalClock();
+    }
+    if (settings.ShowDayOfWeek) {
+      showDayOfWeek();
+    } else {
+      hideDayOfWeek();
+    }
+    if (settings.ShowDate) {
+      showDate();
+    } else {
+      hideDate();
+    }
+    if (settings.ShowBatteryPercentage) {
+      showBatteryPercentage();
+    } else {
+      hideBatteryPercentage();
     }
     light = (ImageView)findViewById(R.id.light);
     mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -112,8 +128,12 @@ public class Anital extends Activity implements SensorEventListener {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
     settings.SensorSpeed = preferences.getInt("Anital_SensorSpeed", SensorManager.SENSOR_DELAY_UI);
     settings.ShowDigitalTime = preferences.getBoolean("Anital_ShowDigitalTime", true);
+    settings.ShowDate = preferences.getBoolean("Anital_ShowDate", true);
     settings.ShowBatteryPercentage = preferences.getBoolean("Anital_ShowBatteryPercentage", true);
     settings.ShowDayOfWeek = preferences.getBoolean("Anital_ShowDayOfWeek", false);
+    if (settings.ShowDayOfWeek) {
+      settings.ShowDigitalTime = false;
+    }
   }
 
   private void createTime(String timeZone) {
@@ -148,6 +168,11 @@ public class Anital extends Activity implements SensorEventListener {
     sdf.setCalendar(mTime);
     TextView date = (TextView)findViewById(R.id.date);
     date.setText(sdf.format(mTime.getTime()));
+
+    sdf = new SimpleDateFormat("EEEE");
+    sdf.setCalendar(mTime);
+    TextView day_of_week = (TextView)findViewById(R.id.day_of_week);
+    day_of_week.setText(sdf.format(mTime.getTime()));
   }
 
   private void hideBackground() {
@@ -179,6 +204,36 @@ public class Anital extends Activity implements SensorEventListener {
   private void showDigitalClock() {
     DigitalClock digital_clock = (DigitalClock)findViewById(R.id.digital_clock);
     digital_clock.setVisibility(View.VISIBLE);
+  }
+
+  private void hideDayOfWeek() {
+    TextView day_of_week = (TextView)findViewById(R.id.day_of_week);
+    day_of_week.setVisibility(View.INVISIBLE);
+  }
+
+  private void showDayOfWeek() {
+    TextView day_of_week = (TextView)findViewById(R.id.day_of_week);
+    day_of_week.setVisibility(View.VISIBLE);
+  }
+
+  private void hideDate() {
+    TextView date = (TextView)findViewById(R.id.date);
+    date.setVisibility(View.INVISIBLE);
+  }
+
+  private void showDate() {
+    TextView date = (TextView)findViewById(R.id.date);
+    date.setVisibility(View.VISIBLE);
+  }
+
+  private void hideBatteryPercentage() {
+    TextView watchBattery = (TextView)findViewById(R.id.watchBattery);
+    watchBattery.setVisibility(View.INVISIBLE);
+  }
+
+  private void showBatteryPercentage() {
+    TextView watchBattery = (TextView)findViewById(R.id.watchBattery);
+    watchBattery.setVisibility(View.VISIBLE);
   }
 
   private void updateWatchBatteryPercentage() {
