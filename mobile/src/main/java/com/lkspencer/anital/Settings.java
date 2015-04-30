@@ -1,3 +1,4 @@
+/*
 package com.lkspencer.anital;
 
 import android.app.Activity;
@@ -53,7 +54,7 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
     fragmentManager.beginTransaction()
             .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
             .commit();
-    */
+    * /
   }
 
   @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -163,3 +164,4 @@ public class Settings extends ActionBarActivity implements NavigationDrawerFragm
   }
 
 }
+*/

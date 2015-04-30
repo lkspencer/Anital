@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -22,6 +23,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 
 import java.text.DateFormat;
@@ -35,15 +37,8 @@ import java.util.TimeZone;
  */
 public class Anital extends CanvasWatchFaceService {
 
-  private Engine engine;
-
   @Override public Engine onCreateEngine() {
-    this.engine = new Engine();
-    return this.engine;
-  }
-
-  public Engine getEngine() {
-    return this.engine;
+    return new Engine();
   }
 
   public class Engine extends CanvasWatchFaceService.Engine implements SensorEventListener {
@@ -54,29 +49,35 @@ public class Anital extends CanvasWatchFaceService {
     boolean mLowBitAmbient;
     boolean mBurnInProtection;
     boolean mRegisteredTimeZoneReceiver;
-    private class AnitalSettings {
+    class AnitalSettings {
       public int SensorSpeed;
       public boolean ShowDigitalTime;
       public boolean ShowDate;
       public boolean ShowBatteryPercentage;
       public boolean ShowDayOfWeek;
     }
-    private AnitalSettings settings = new AnitalSettings();
+    AnitalSettings settings = new AnitalSettings();
+
+    /* values */
+    float gravity;
 
     /* graphic objects */
     Bitmap mBackgroundBitmap;
     Bitmap mBackgroundScaledBitmap;
     Bitmap mLightBitmap;
+    Bitmap mLogo;
     Matrix matrix;
     Paint mHourPaint;
+    Paint mHourDividerPaint;
     Paint mMinutePaint;
     Paint mSecondPaint;
     Paint mBoxPaint;
     Paint mBackgroundPaint;
+    Paint mDigital;
     DateFormat timeFormat;
 
     /* handler to update the time once a second in interactive mode */
-    private Handler mUpdateTimeHandler = new UpdateTimeHandler(Anital.this);
+    private Handler mUpdateTimeHandler = new UpdateTimeHandler(this);
 
     /* receiver to update the time zone */
     final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
@@ -106,6 +107,9 @@ public class Anital extends CanvasWatchFaceService {
       setWatchFaceStyle(new WatchFaceStyle.Builder(Anital.this)
           .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
           .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
+          .setStatusBarGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL)
+          .setHotwordIndicatorGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL)
+          .setViewProtection(WatchFaceStyle.PROTECT_STATUS_BAR | WatchFaceStyle.PROTECT_HOTWORD_INDICATOR)
           .setShowSystemUiTime(false)
           .build());
 
@@ -113,6 +117,9 @@ public class Anital extends CanvasWatchFaceService {
       Resources resources = Anital.this.getResources();
       Drawable backgroundDrawable = resources.getDrawable(R.drawable.background, getTheme());
       mBackgroundBitmap = backgroundDrawable != null ? ((BitmapDrawable) backgroundDrawable).getBitmap() : null;
+
+      Drawable logoDrawable = resources.getDrawable(R.drawable.logo_12, getTheme());
+      mLogo = logoDrawable != null ? ((BitmapDrawable) logoDrawable).getBitmap() : null;
 
       /* load the background image */
       Drawable lightDrawable = resources.getDrawable(R.drawable.light, getTheme());
@@ -125,6 +132,12 @@ public class Anital extends CanvasWatchFaceService {
       mHourPaint.setStrokeWidth(5.0f);
       mHourPaint.setAntiAlias(true);
       mHourPaint.setStrokeCap(Paint.Cap.ROUND);
+
+      mHourDividerPaint = new Paint();
+      mHourDividerPaint.setARGB(255, 200, 200, 200);
+      mHourDividerPaint.setStrokeWidth(1.0f);
+      mHourDividerPaint.setAntiAlias(true);
+
 
       mMinutePaint = new Paint();
       mMinutePaint.setARGB(255, 200, 200, 200);
@@ -144,6 +157,13 @@ public class Anital extends CanvasWatchFaceService {
       mBackgroundPaint = new Paint();
       mBackgroundPaint.setARGB(255, 0, 0, 0);
 
+      mDigital = new Paint();
+      mDigital.setShadowLayer(5f, 0f, 0f, Color.BLACK);
+      mDigital.setTextSize(30);
+      mDigital.setFakeBoldText(true);
+      mDigital.setTextAlign(Paint.Align.CENTER);
+      mDigital.setARGB(255, 255, 255, 255);
+
       /* allocate an object to hold the time */
       mTime = new GregorianCalendar();
     }
@@ -151,9 +171,7 @@ public class Anital extends CanvasWatchFaceService {
     @Override public final void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
     @Override public final void onSensorChanged(SensorEvent event) {
-      if (mLightBitmap != null && !isInAmbientMode()) {
-        matrix.setRotate(event.values[1] * 10.0f, mLightBitmap.getWidth() / 2, mLightBitmap.getHeight() / 2);
-      }
+      gravity = event.values[1];
     }
 
     @Override public void onPropertiesChanged(Bundle properties) {
@@ -200,20 +218,81 @@ public class Anital extends CanvasWatchFaceService {
         }
 
         canvas.drawBitmap(mBackgroundScaledBitmap, 0, 0, null);
+        matrix.setRotate(gravity * 10f, mLightBitmap.getWidth() / 2, mLightBitmap.getHeight() / 2);
         matrix.postTranslate((-mLightBitmap.getWidth() / 2 + centerX), (-mLightBitmap.getHeight() / 2 + centerY));
         canvas.drawBitmap(mLightBitmap, matrix, null);
-        drawHourLine(1, centerX, centerY, canvas);
-        drawHourLine(2, centerX, centerY, canvas);
-        drawHourLine(3, centerX, centerY, canvas);
-        drawHourLine(4, centerX, centerY, canvas);
-        drawHourLine(5, centerX, centerY, canvas);
-        drawHourLine(6, centerX, centerY, canvas);
-        drawHourLine(7, centerX, centerY, canvas);
-        drawHourLine(8, centerX, centerY, canvas);
-        drawHourLine(9, centerX, centerY, canvas);
-        drawHourLine(10, centerX, centerY, canvas);
-        drawHourLine(11, centerX, centerY, canvas);
-        drawHourLine(12, centerX, centerY, canvas);
+        drawHourLine(1f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(1.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(1.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(1.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(1.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(2f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(2.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(2.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(2.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(2.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(3f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(3.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(3.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(3.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(3.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(4f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(4.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(4.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(4.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(4.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(5f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(5.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(5.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(5.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(5.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(6f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(6.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(6.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(6.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(6.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(7f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(7.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(7.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(7.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(7.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(8f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(8.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(8.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(8.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(8.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(9f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(9.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(9.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(9.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(9.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(10f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(10.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(10.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(10.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(10.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        drawHourLine(11f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(11.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(11.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(11.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(11.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        canvas.drawBitmap(mLogo, centerX - 23, 16, null);
+        //drawHourLine(12f, 25, centerX, centerY, canvas, mHourPaint);
+        drawHourLine(12.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(12.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(12.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        drawHourLine(12.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
       } else {
         canvas.drawRect(0,0,width,height, mBackgroundPaint);
       }
@@ -249,14 +328,11 @@ public class Anital extends CanvasWatchFaceService {
         mSecondPaint.setTextAlign(Paint.Align.CENTER);
         canvas.drawText(String.valueOf(seconds), centerX + secX + 10, centerY + secY + 10, mSecondPaint);
         //*/
-        canvas.drawRect(0, 0, width, 45, mBoxPaint);
+        //canvas.drawRect(0, 0, width, 45, mBoxPaint);
       }
 
-      mHourPaint.setTextSize(30);
-      mHourPaint.setFakeBoldText(true);
-      mHourPaint.setTextAlign(Paint.Align.CENTER);
       timeFormat.setCalendar(mTime);
-      canvas.drawText(timeFormat.format(mTime.getTime()), width / 2, 35, mHourPaint);
+      canvas.drawText(timeFormat.format(mTime.getTime()), centerX, (centerY / 2) + 20, mDigital);
 
     }
 
@@ -324,13 +400,13 @@ public class Anital extends CanvasWatchFaceService {
       Anital.this.unregisterReceiver(mTimeZoneReceiver);
     }
 
-    private void drawHourLine(int hour, float centerX, float centerY, Canvas canvas) {
+    private void drawHourLine(float hour, int length, float centerX, float centerY, Canvas canvas, Paint paint) {
       float hrRot = (hour / 6f ) * (float) Math.PI;
-      float startX = (float) Math.sin(hrRot) * (centerX - 45);
-      float startY = (float) -Math.cos(hrRot) * (centerX - 45);
+      float startX = (float) Math.sin(hrRot) * (centerX - 20 - length);
+      float startY = (float) -Math.cos(hrRot) * (centerX - 20 - length);
       float endX = (float) Math.sin(hrRot) * (centerX - 20);
       float endY = (float) -Math.cos(hrRot) * (centerX - 20);
-      canvas.drawLine(centerX + startX, centerY + startY, centerX + endX, centerY + endY, mHourPaint);
+      canvas.drawLine(centerX + startX, centerY + startY, centerX + endX, centerY + endY, paint);
     }
 
   }
