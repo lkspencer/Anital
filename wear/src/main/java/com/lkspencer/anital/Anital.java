@@ -26,6 +26,7 @@ import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
+import android.view.WindowInsets;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -65,6 +66,7 @@ public class Anital extends CanvasWatchFaceService {
     }
     AnitalSettings settings = new AnitalSettings();
     GoogleApiClient mGoogleApiClient = null;
+    boolean mIsRound = false;
 
     /* values */
     float gravity;
@@ -404,6 +406,18 @@ public class Anital extends CanvasWatchFaceService {
         drawHourLine(12.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
         drawHourLine(12.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
         drawHourLine(12.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+
+        if (mIsRound) {
+          canvas.drawBitmap(mWatch, 55, centerY - 15, null);
+          canvas.drawText(batteryPercentage + "%", 85, centerY + 6, mWatchPaint);
+          canvas.drawBitmap(mPhone, width - 55 - mPhoneWidth, centerY - 15, null);
+          canvas.drawText(phoneBatteryPercentage + "%", width - 80, centerY + 6, mPhonePaint);
+        } else {
+          canvas.drawBitmap(mWatch, 10, 10, null);
+          canvas.drawText(batteryPercentage + "%", 40, 30, mWatchPaint);
+          canvas.drawBitmap(mPhone, width - 10 - mPhoneWidth, 8, null);
+          canvas.drawText(phoneBatteryPercentage + "%", width - 40, 30, mPhonePaint);
+        }
       } else {
         canvas.drawRect(0,0,width,height, mBackgroundPaint);
       }
@@ -434,11 +448,6 @@ public class Anital extends CanvasWatchFaceService {
         float secX = (float) Math.sin(secRot) * secLength;
         float secY = (float) -Math.cos(secRot) * secLength;
         canvas.drawLine(centerX, centerY, centerX + secX, centerY + secY, mSecondPaint);
-
-        canvas.drawBitmap(mWatch, 10, 10, null);
-        canvas.drawText(batteryPercentage + "%", 40, 30, mWatchPaint);
-        canvas.drawBitmap(mPhone, width - 10 - mPhoneWidth, 8, null);
-        canvas.drawText(phoneBatteryPercentage + "%", width - 40, 30, mPhonePaint);
       }
 
       timeFormat.setCalendar(mTime);
@@ -464,6 +473,11 @@ public class Anital extends CanvasWatchFaceService {
       updateTimer();
     }
 
+    @Override public void onApplyWindowInsets(WindowInsets insets) {
+      super.onApplyWindowInsets(insets);
+      mIsRound = insets.isRound();
+      //mChinSize = insets.getSystemWindowInsetBottom();
+    }
 
 
     private void updateTimer() {
