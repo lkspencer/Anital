@@ -1,7 +1,9 @@
 package com.lkspencer.anital;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
@@ -48,6 +50,13 @@ public class DataLayerListenerService extends WearableListenerService {
 
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
       preferences.edit().putBoolean("Anital_ShowBatteryPercentage", show_battery).apply();
+    } else if ("Anital_PhonePercent".equalsIgnoreCase(path)) {
+      ByteBuffer wrapped = ByteBuffer.wrap(messageEvent.getData());
+      int Anital_PhonePercent = wrapped.getInt();
+      Intent i = new Intent();
+      i.setAction("Anital_PhonePercent");
+      i.putExtra("percent", Anital_PhonePercent);
+      this.sendBroadcast(i);
     }
     super.onMessageReceived(messageEvent);
   }

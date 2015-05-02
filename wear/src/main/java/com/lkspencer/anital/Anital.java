@@ -18,6 +18,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -25,6 +26,12 @@ import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -41,7 +48,7 @@ public class Anital extends CanvasWatchFaceService {
     return new Engine();
   }
 
-  public class Engine extends CanvasWatchFaceService.Engine implements SensorEventListener {
+  public class Engine extends CanvasWatchFaceService.Engine implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     /* a time object */
     GregorianCalendar mTime;
 
@@ -57,15 +64,24 @@ public class Anital extends CanvasWatchFaceService {
       public boolean ShowDayOfWeek;
     }
     AnitalSettings settings = new AnitalSettings();
+    GoogleApiClient mGoogleApiClient = null;
 
     /* values */
     float gravity;
+    int batteryPercentage;
+    int phoneBatteryPercentage;
+    String googleApiAction;
+    int mPhoneWidth = 0;
+    int mLightBitmapWidth = 0;
+    int mLightBitmapHeight = 0;
 
     /* graphic objects */
     Bitmap mBackgroundBitmap;
     Bitmap mBackgroundScaledBitmap;
     Bitmap mLightBitmap;
     Bitmap mLogo;
+    Bitmap mWatch;
+    Bitmap mPhone;
     Matrix matrix;
     Paint mHourPaint;
     Paint mHourDividerPaint;
@@ -74,6 +90,8 @@ public class Anital extends CanvasWatchFaceService {
     Paint mBoxPaint;
     Paint mBackgroundPaint;
     Paint mDigital;
+    Paint mWatchPaint;
+    Paint mPhonePaint;
     DateFormat timeFormat;
 
     /* handler to update the time once a second in interactive mode */
@@ -88,8 +106,61 @@ public class Anital extends CanvasWatchFaceService {
       }
     };
 
+    /* receiver to update battery percentage */
+    final BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
+      {} @Override public void onReceive(Context context, Intent batteryStatus) {
+        if (batteryStatus == null
+            || !Intent.ACTION_BATTERY_CHANGED.equalsIgnoreCase(batteryStatus.getAction())) return;
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        batteryPercentage = (int)((level / (float)scale) * 100);
+      }
+    };
+
+    /* receiver to update battery percentage */
+    final BroadcastReceiver mPhoneBatteryReceiver = new BroadcastReceiver() {
+      {} @Override public void onReceive(Context context, Intent batteryStatus) {
+        if (batteryStatus == null || !"Anital_PhonePercent".equalsIgnoreCase(batteryStatus.getAction())) return;
+        int percent = batteryStatus.getIntExtra("percent", -1);
+        if (percent != -1) {
+          phoneBatteryPercentage = percent;
+        }
+      }
+    };
 
 
+
+    /* Data Google API Client */
+    @Override public void onConnected(Bundle bundle) {
+      new Thread(new Runnable() {
+        {} @Override public void run() {
+          NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
+          for(Node node : nodes.getNodes()) {
+            /*MessageApi.SendMessageResult result = */Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), googleApiAction, new byte[0]).await();
+          }
+          mGoogleApiClient.disconnect();
+        }
+      }).start();
+    }
+
+    @Override public void onConnectionSuspended(int i) { }
+
+    @Override public void onConnectionFailed(ConnectionResult connectionResult) { }
+
+
+
+    /* Sensor Event Listener */
+    @Override public final void onAccuracyChanged(Sensor sensor, int accuracy) { }
+
+    @Override public final void onSensorChanged(SensorEvent event) {
+      gravity = event.values[1];
+    }
+
+
+
+    /* CanvasWatchFaceService.Engine */
     @Override public void onCreate(SurfaceHolder holder) {
       super.onCreate(holder);
 
@@ -102,6 +173,12 @@ public class Anital extends CanvasWatchFaceService {
       if (accelerometer != null) {
         mSensorManager.registerListener(this, accelerometer, settings.SensorSpeed);
       }
+
+      IntentFilter intentWatchFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+      Anital.this.registerReceiver(mBatteryReceiver, intentWatchFilter);
+      IntentFilter intentPhoneFilter = new IntentFilter("Anital_PhonePercent");
+      Anital.this.registerReceiver(mPhoneBatteryReceiver, intentPhoneFilter);
+
 
       /* configure the system UI */
       setWatchFaceStyle(new WatchFaceStyle.Builder(Anital.this)
@@ -124,7 +201,20 @@ public class Anital extends CanvasWatchFaceService {
       /* load the background image */
       Drawable lightDrawable = resources.getDrawable(R.drawable.light, getTheme());
       mLightBitmap = lightDrawable != null ? ((BitmapDrawable) lightDrawable).getBitmap() : null;
+      if (mLightBitmap != null) {
+        mLightBitmapWidth = mLightBitmap.getWidth();
+        mLightBitmapHeight = mLightBitmap.getHeight();
+      }
       matrix = new Matrix();
+
+      Drawable watchDrawable = resources.getDrawable(R.drawable.wear_icon, getTheme());
+      mWatch = watchDrawable != null ? ((BitmapDrawable) watchDrawable).getBitmap() : null;
+
+      Drawable phoneDrawable = resources.getDrawable(R.drawable.phone_icon, getTheme());
+      mPhone = phoneDrawable != null ? ((BitmapDrawable) phoneDrawable).getBitmap() : null;
+      if (mPhone != null) {
+        mPhoneWidth = mPhone.getWidth();
+      }
 
       /* create graphic styles */
       mHourPaint = new Paint();
@@ -164,14 +254,36 @@ public class Anital extends CanvasWatchFaceService {
       mDigital.setTextAlign(Paint.Align.CENTER);
       mDigital.setARGB(255, 255, 255, 255);
 
+      mWatchPaint = new Paint();
+      mWatchPaint.setTextSize(16);
+      mWatchPaint.setTextAlign(Paint.Align.LEFT);
+      mWatchPaint.setARGB(255, 255, 255, 255);
+
+      mPhonePaint = new Paint();
+      mPhonePaint.setTextSize(16);
+      mPhonePaint.setTextAlign(Paint.Align.RIGHT);
+      mPhonePaint.setARGB(255, 255, 255, 255);
+
       /* allocate an object to hold the time */
       mTime = new GregorianCalendar();
+
+      mGoogleApiClient = new GoogleApiClient.Builder(Anital.this)
+          .addApi(Wearable.API)
+          .addConnectionCallbacks(this)
+          .addOnConnectionFailedListener(this)
+          .build();
+      googleApiAction = "Anital_PhonePercent";
+      mGoogleApiClient.connect();
     }
 
-    @Override public final void onAccuracyChanged(Sensor sensor, int accuracy) { }
-
-    @Override public final void onSensorChanged(SensorEvent event) {
-      gravity = event.values[1];
+    @Override public void onDestroy() {
+      Anital.this.unregisterReceiver(mBatteryReceiver);
+      Anital.this.unregisterReceiver(mPhoneBatteryReceiver);
+      if (mGoogleApiClient != null) {
+        googleApiAction = "Anital_Stop";
+        mGoogleApiClient.connect();
+      }
+      super.onDestroy();
     }
 
     @Override public void onPropertiesChanged(Bundle properties) {
@@ -189,12 +301,12 @@ public class Anital extends CanvasWatchFaceService {
     @Override public void onAmbientModeChanged(boolean inAmbientMode) {
       super.onAmbientModeChanged(inAmbientMode);
 
+      googleApiAction = "Anital_PhonePercent";
+      mGoogleApiClient.connect();
       if (mLowBitAmbient) {
         boolean antiAlias = !inAmbientMode;
         mHourPaint.setAntiAlias(antiAlias);
         mMinutePaint.setAntiAlias(antiAlias);
-        mSecondPaint.setAntiAlias(antiAlias);
-        //mTickPaint.setAntiAlias(antiAlias);
       }
       invalidate();
       updateTimer();
@@ -218,8 +330,8 @@ public class Anital extends CanvasWatchFaceService {
         }
 
         canvas.drawBitmap(mBackgroundScaledBitmap, 0, 0, null);
-        matrix.setRotate(gravity * 10f, mLightBitmap.getWidth() / 2, mLightBitmap.getHeight() / 2);
-        matrix.postTranslate((-mLightBitmap.getWidth() / 2 + centerX), (-mLightBitmap.getHeight() / 2 + centerY));
+        matrix.setRotate(gravity * 10f, mLightBitmapWidth / 2, mLightBitmapHeight / 2);
+        matrix.postTranslate((-mLightBitmapWidth / 2 + centerX), (-mLightBitmapHeight / 2 + centerY));
         canvas.drawBitmap(mLightBitmap, matrix, null);
         drawHourLine(1f, 25, centerX, centerY, canvas, mHourPaint);
         drawHourLine(1.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
@@ -288,7 +400,6 @@ public class Anital extends CanvasWatchFaceService {
         drawHourLine(11.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
 
         canvas.drawBitmap(mLogo, centerX - 23, 16, null);
-        //drawHourLine(12f, 25, centerX, centerY, canvas, mHourPaint);
         drawHourLine(12.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
         drawHourLine(12.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
         drawHourLine(12.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
@@ -323,12 +434,11 @@ public class Anital extends CanvasWatchFaceService {
         float secX = (float) Math.sin(secRot) * secLength;
         float secY = (float) -Math.cos(secRot) * secLength;
         canvas.drawLine(centerX, centerY, centerX + secX, centerY + secY, mSecondPaint);
-        /*
-        mSecondPaint.setTextSize(20);
-        mSecondPaint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText(String.valueOf(seconds), centerX + secX + 10, centerY + secY + 10, mSecondPaint);
-        //*/
-        //canvas.drawRect(0, 0, width, 45, mBoxPaint);
+
+        canvas.drawBitmap(mWatch, 10, 10, null);
+        canvas.drawText(batteryPercentage + "%", 40, 30, mWatchPaint);
+        canvas.drawBitmap(mPhone, width - 10 - mPhoneWidth, 8, null);
+        canvas.drawText(phoneBatteryPercentage + "%", width - 40, 30, mPhonePaint);
       }
 
       timeFormat.setCalendar(mTime);
@@ -347,18 +457,14 @@ public class Anital extends CanvasWatchFaceService {
         mTime.clear();
         mTime.setTimeZone(TimeZone.getDefault());
         mTime.setTimeInMillis(System.currentTimeMillis());
-        /*
-        mTime.clear(TimeZone.getDefault().getID());
-        mTime.setToNow();
-        */
       } else {
         unregisterReceiver();
       }
 
-      // Whether the timer should be running depends on whether we're visible and
-      // whether we're in ambient mode), so we may need to start or stop the timer
       updateTimer();
     }
+
+
 
     private void updateTimer() {
       mUpdateTimeHandler.removeMessages(UpdateTimeHandler.MSG_UPDATE_TIME);
