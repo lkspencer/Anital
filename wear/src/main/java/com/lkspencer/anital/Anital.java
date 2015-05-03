@@ -81,6 +81,7 @@ public class Anital extends CanvasWatchFaceService {
     Bitmap mBackgroundBitmap;
     Bitmap mBackgroundScaledBitmap;
     Bitmap mLightBitmap;
+    Bitmap mTickBackground;
     Bitmap mLogo;
     Bitmap mWatch;
     Bitmap mPhone;
@@ -324,7 +325,6 @@ public class Anital extends CanvasWatchFaceService {
       float centerY = height / 2f;
 
       if (!isInAmbientMode()) {
-        // Draw the background, scaled to fit.
         if (mBackgroundScaledBitmap == null
             || mBackgroundScaledBitmap.getWidth() != width
             || mBackgroundScaledBitmap.getHeight() != height) {
@@ -335,87 +335,17 @@ public class Anital extends CanvasWatchFaceService {
         matrix.setRotate(gravity * 10f, mLightBitmapWidth / 2, mLightBitmapHeight / 2);
         matrix.postTranslate((-mLightBitmapWidth / 2 + centerX), (-mLightBitmapHeight / 2 + centerY));
         canvas.drawBitmap(mLightBitmap, matrix, null);
-        drawHourLine(1f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(1.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(1.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(1.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(1.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
 
-        drawHourLine(2f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(2.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(2.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(2.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(2.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(3f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(3.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(3.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(3.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(3.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(4f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(4.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(4.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(4.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(4.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(5f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(5.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(5.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(5.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(5.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(6f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(6.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(6.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(6.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(6.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(7f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(7.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(7.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(7.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(7.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(8f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(8.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(8.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(8.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(8.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(9f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(9.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(9.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(9.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(9.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(10f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(10.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(10.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(10.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(10.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        drawHourLine(11f, 25, centerX, centerY, canvas, mHourPaint);
-        drawHourLine(11.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(11.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(11.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(11.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
-
-        canvas.drawBitmap(mLogo, centerX - 23, 16, null);
-        drawHourLine(12.2f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(12.4f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(12.6f, 10, centerX, centerY, canvas, mHourDividerPaint);
-        drawHourLine(12.8f, 10, centerX, centerY, canvas, mHourDividerPaint);
+        if (mTickBackground == null) {
+          setupMainBackground(canvas, centerX, centerY, width);
+        }
+        canvas.drawBitmap(mTickBackground, 0, 0, null);
 
         if (mIsRound) {
-          canvas.drawBitmap(mWatch, 55, centerY - 15, null);
           canvas.drawText(batteryPercentage + "%", 85, centerY + 6, mWatchPaint);
-          canvas.drawBitmap(mPhone, width - 55 - mPhoneWidth, centerY - 15, null);
           canvas.drawText(phoneBatteryPercentage + "%", width - 80, centerY + 6, mPhonePaint);
         } else {
-          canvas.drawBitmap(mWatch, 10, 10, null);
           canvas.drawText(batteryPercentage + "%", 40, 30, mWatchPaint);
-          canvas.drawBitmap(mPhone, width - 10 - mPhoneWidth, 8, null);
           canvas.drawText(phoneBatteryPercentage + "%", width - 40, 30, mPhonePaint);
         }
       } else {
@@ -480,6 +410,7 @@ public class Anital extends CanvasWatchFaceService {
     }
 
 
+
     private void updateTimer() {
       mUpdateTimeHandler.removeMessages(UpdateTimeHandler.MSG_UPDATE_TIME);
       if (shouldTimerBeRunning()) {
@@ -518,6 +449,90 @@ public class Anital extends CanvasWatchFaceService {
       }
       mRegisteredTimeZoneReceiver = false;
       Anital.this.unregisterReceiver(mTimeZoneReceiver);
+    }
+
+    private void setupMainBackground(Canvas canvas, float centerX, float centerY, int width) {
+      mTickBackground = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
+      Canvas blankCanvas = new Canvas(mTickBackground);
+      drawHourLine(1f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(1.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(1.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(1.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(1.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(2f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(2.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(2.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(2.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(2.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(3f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(3.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(3.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(3.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(3.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(4f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(4.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(4.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(4.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(4.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(5f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(5.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(5.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(5.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(5.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(6f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(6.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(6.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(6.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(6.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(7f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(7.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(7.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(7.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(7.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(8f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(8.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(8.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(8.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(8.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(9f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(9.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(9.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(9.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(9.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(10f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(10.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(10.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(10.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(10.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      drawHourLine(11f, 25, centerX, centerY, blankCanvas, mHourPaint);
+      drawHourLine(11.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(11.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(11.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(11.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      blankCanvas.drawBitmap(mLogo, centerX - 23, 16, null);
+      drawHourLine(12.2f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(12.4f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(12.6f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+      drawHourLine(12.8f, 10, centerX, centerY, blankCanvas, mHourDividerPaint);
+
+      if (mIsRound) {
+        blankCanvas.drawBitmap(mWatch, 55, centerY - 15, null);
+        blankCanvas.drawBitmap(mPhone, width - 55 - mPhoneWidth, centerY - 15, null);
+      } else {
+        blankCanvas.drawBitmap(mWatch, 10, 10, null);
+        blankCanvas.drawBitmap(mPhone, width - 10 - mPhoneWidth, 8, null);
+      }
     }
 
     private void drawHourLine(float hour, int length, float centerX, float centerY, Canvas canvas, Paint paint) {
