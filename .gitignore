@@ -1,0 +1,7 @@
+.gradle
+.idea
+.navigation
+build
+gradle
+*.xcf
+local.properties
