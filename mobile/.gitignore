@@ -1,1 +1,6 @@
 /build
+/libs
+/*.apk
+/*.pro
+/*.png
+.gradle
