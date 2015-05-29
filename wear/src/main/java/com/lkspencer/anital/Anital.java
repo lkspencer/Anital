@@ -351,8 +351,16 @@ public class Anital extends CanvasWatchFaceService {
       float hrY = (float) -Math.cos(hrRot) * hrLength;
       canvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY, mHourPaint);
       //*/
-      //matrix.setRotate(hrRot);
-      //canvas.drawBitmap(mHour, matrix, null);
+      /*
+      Paint p = new Paint();
+      p.setAntiAlias(true);
+      Matrix m = new Matrix();
+      m.preTranslate(145, centerY - 102);
+      m.preRotate(((hours * 60f) + minutes) * 0.5f, 10, 68);
+      //m.postTranslate(145, centerY - 68);
+      //m.setRotate(0);
+      canvas.drawBitmap(mHour, m, p);
+      //*/
 
       float minX = (float) Math.sin(minRot) * minLength;
       float minY = (float) -Math.cos(minRot) * minLength;
