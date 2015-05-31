@@ -1,4 +1,4 @@
 /build
-/libs
+/*.iml
 /*.pro
 /src/main/java/com/lkspencer/anital/*_old.java

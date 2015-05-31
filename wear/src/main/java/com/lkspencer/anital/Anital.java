@@ -63,6 +63,7 @@ public class Anital extends CanvasWatchFaceService {
     AnitalSettings settings = new AnitalSettings();
     GoogleApiClient mGoogleApiClient = null;
     boolean mIsRound = false;
+    boolean mVisible = true;
 
     /* values */
     float gravity;
@@ -299,6 +300,7 @@ public class Anital extends CanvasWatchFaceService {
     }
 
     @Override public void onDraw(Canvas canvas, Rect bounds) {
+      if (!mVisible) return;
       mTime.clear();
       mTime.setTimeInMillis(System.currentTimeMillis());
 
@@ -378,12 +380,12 @@ public class Anital extends CanvasWatchFaceService {
 
       timeFormat.setCalendar(mTime);
       canvas.drawText(timeFormat.format(mTime.getTime()), centerX, (centerY / 2) + 20, mDigital);
-
     }
 
     @Override public void onVisibilityChanged(boolean visible) {
       super.onVisibilityChanged(visible);
       /* the watch face became visible or invisible */
+      mVisible = visible;
 
       if (visible) {
         registerReceiver();
