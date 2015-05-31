@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
@@ -21,6 +19,7 @@ import java.nio.ByteBuffer;
 public class DataLayerListenerService extends WearableListenerService {
 
   int batteryPercentage = 0;
+  boolean mIsRegistered = false;
   String googleApiAction;
   GoogleApiClient mGoogleApiClient = null;
 
@@ -57,7 +56,10 @@ public class DataLayerListenerService extends WearableListenerService {
             /*MessageApi.SendMessageResult result = */Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), googleApiAction, data).await();
           }
           mGoogleApiClient.disconnect();
-          DataLayerListenerService.this.unregisterReceiver(mBatteryReceiver);
+          if (mIsRegistered) {
+            mIsRegistered = false;
+            DataLayerListenerService.this.unregisterReceiver(mBatteryReceiver);
+          }
         }
       }).start();
     }
@@ -74,6 +76,7 @@ public class DataLayerListenerService extends WearableListenerService {
     String path = messageEvent.getPath();
     if ("Anital_PhonePercent".equalsIgnoreCase(path)) {
       IntentFilter intentWatchFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+      mIsRegistered = true;
       registerReceiver(mBatteryReceiver, intentWatchFilter);
     }
     super.onMessageReceived(messageEvent);
